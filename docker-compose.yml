@@ -1,0 +1,35 @@
+elasticsearch:
+    image: elasticsearch
+    volumes_from:
+        - elasticsearchData
+    ports:
+        - "9200"
+
+logstash:
+    image: logstash
+    environment:
+        TZ: Europe/Paris
+    expose:
+        - "12201"
+    ports:
+        - "12201:12201"
+        - "12201:12201/udp"
+    volumes:
+        - ./conf:/conf
+    links:
+        - elasticsearch:db
+    command: logstash -f /conf/gelf.conf
+
+kibana:
+    image: kibana
+    links:
+        - elasticsearch:elasticsearch
+    ports:
+        - "5601:5601"
+
+elasticsearchData:
+    image: busybox
+    command: "true"
+    volumes:
+        - /usr/share/elasticsearch/data
+
